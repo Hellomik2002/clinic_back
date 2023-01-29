@@ -1,3 +1,15 @@
+// MONGO
+// datasource db {
+//   provider = "mongodb"
+//   url      = "mongodb+srv://admin:gpPHn4BEjdHyG91w@cluster0.bo29m4x.mongodb.net/pulse_dev"
+// }
+
+// POSTGRE
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://postgres:rPRO4MoO4iYOwDqwBQC2@containers-us-west-143.railway.app:5505/railway"
+}
+
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
@@ -5,7 +17,26 @@ generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
-  provider = "mongodb"
-  url      = env("DATABASE_URL")
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
+
+model User {
+  id          String   @id @default(cuid()) //@id @default(auto()) @map("_id") @db.ObjectId
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  fullName    String
+  uniqueName  String   @unique
+  // borthDate   DateTime @db.Date
+  email       String
+  phoneNumber String   @unique
+  address     String
+  password    String
+}
+
+generator nestgraphql {
+  provider = "node node_modules/prisma-nestjs-graphql"
+  // for yarn monorepos
+  // provider = "prisma-nestjs-graphql"
+  output   = "../src/@generated"
 }
