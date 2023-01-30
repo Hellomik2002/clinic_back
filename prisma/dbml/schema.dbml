@@ -6,10 +6,36 @@ Table User {
   id String [pk]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
-  fullName String [not null]
-  uniqueName String [unique, not null]
-  email String [not null]
-  phoneNumber String [unique, not null]
-  address String [not null]
+  email String [unique, not null]
   password String [not null]
+  firstname String
+  lastname String
+  role Role [not null, default: 'USER']
+  appointmentsAsAuthor Appointment [not null]
+  appointmentsAsPatient Appointment [not null]
 }
+
+Table Appointment {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  date DateTime [not null]
+  title String [not null]
+  content String
+  author User [not null]
+  authorId String [not null]
+  patient User [not null]
+  patientId String [not null]
+}
+
+Enum Role {
+  ADMIN
+  USER
+  PATIENT
+  DOCTOR
+  LABORATORY
+}
+
+Ref: Appointment.authorId > User.id
+
+Ref: Appointment.patientId > User.id

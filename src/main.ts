@@ -1,33 +1,51 @@
-import { NestFactory } from '@nestjs/core';
-import dayjs from 'dayjs';
-import UTCPlugin from 'dayjs/plugin/utc';
-import ISOPlugin from 'dayjs/plugin/isoWeek';
-import IsBetweenPlugin from 'dayjs/plugin/isBetween';
-import IsSameOrAfterPlugin from 'dayjs/plugin/isSameOrAfter';
-import isSameOrBeforePlugin from 'dayjs/plugin/isSameOrBefore';
-import DurationPlugin from 'dayjs/plugin/duration';
-
+import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { PrismaClientExceptionFilter, PrismaService } from 'nestjs-prisma';
 import { AppModule } from './app.module';
-import graphqlUploadExpress from './utils/graphql_upload/graphqlUploadExpress';
-import { from } from 'rxjs';
-import { PrismaClient } from '@prisma/client';
-
-export const prismaClient = new PrismaClient();
+import type {
+  CorsConfig,
+  NestConfig,
+  SwaggerConfig,
+} from 'src/common/configs/config.interface';
 
 async function bootstrap() {
-  dayjs.extend(UTCPlugin);
-  dayjs.extend(ISOPlugin);
-  dayjs.extend(IsBetweenPlugin);
-  dayjs.extend(IsSameOrAfterPlugin);
-  dayjs.extend(isSameOrBeforePlugin);
-  dayjs.extend(DurationPlugin);
+  const app = await NestFactory.create(AppModule);
 
-  const app = await NestFactory.create(AppModule, {
-    cors: true,
-  });
+  // Validation
+  app.useGlobalPipes(new ValidationPipe());
 
-  app.use('/graphql', graphqlUploadExpress({}));
+  // enable shutdown hook
+  const prismaService: PrismaService = app.get(PrismaService);
+  await prismaService.enableShutdownHooks(app);
 
-  await app.listen(3000);
+  // Prisma Client Exception Filter for unhandled exceptions
+  const { httpAdapter } = app.get(HttpAdapterHost);
+  app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter));
+
+  const configService = app.get(ConfigService);
+  const nestConfig = configService.get<NestConfig>('nest');
+  const corsConfig = configService.get<CorsConfig>('cors');
+  const swaggerConfig = configService.get<SwaggerConfig>('swagger');
+
+  // Swagger Api
+  if (swaggerConfig.enabled) {
+    const options = new DocumentBuilder()
+      .setTitle(swaggerConfig.title || 'Nestjs')
+      .setDescription(swaggerConfig.description || 'The nestjs API description')
+      .setVersion(swaggerConfig.version || '1.0')
+      .build();
+    const document = SwaggerModule.createDocument(app, options);
+
+    SwaggerModule.setup(swaggerConfig.path || 'api', app, document);
+  }
+
+  // Cors
+  if (corsConfig.enabled) {
+    app.enableCors();
+  }
+
+  await app.listen(process.env.PORT || nestConfig.port || 3000);
 }
 bootstrap();

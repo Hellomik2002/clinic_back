@@ -1,39 +1,38 @@
-import { Module } from '@nestjs/common';
+import { GraphQLModule } from '@nestjs/graphql';
+import { Logger, Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { PrismaModule } from 'nestjs-prisma';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { GraphQLModule } from '@nestjs/graphql';
+import { AppResolver } from './app.resolver';
+import { AuthModule } from 'src/auth/auth.module';
+import { UsersModule } from 'src/users/users.module';
+import config from 'src/common/configs/config';
+import { loggingMiddleware } from 'src/common/middleware/logging.middleware';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
-import { CheckModule } from './check/check.module';
-import { MongooseModule } from '@nestjs/mongoose';
-import { ConfigModule } from '@nestjs/config';
-import { BookingModel } from './booking/booking.model';
-import { PrismaModule } from 'nestjs-prisma';
-import { UserModule } from './user/user.module';
+import { GqlConfigService } from './gql-config.service';
+import { AppointmentsModule } from './appointments/appointments.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
+    ConfigModule.forRoot({ isGlobal: true, load: [config] }),
     PrismaModule.forRoot({
       isGlobal: true,
+      prismaServiceOptions: {
+        middlewares: [loggingMiddleware(new Logger('PrismaMiddleware'))], // configure your prisma middleware
+      },
     }),
-    MongooseModule.forRoot(process.env.DATABASE_URL, {
-      dbName: process.env.DATABASE_NAME,
-    }),
-    GraphQLModule.forRoot<ApolloDriverConfig>({
+
+    GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
-      debug: true,
-      playground: false,
-      autoSchemaFile: true,
-      sortSchema: true,
-      plugins: [ApolloServerPluginLandingPageLocalDefault()],
+      useClass: GqlConfigService,
     }),
-    BookingModel,
-    UserModule,
+
+    AuthModule,
+    UsersModule,
+    AppointmentsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AppResolver],
 })
 export class AppModule {}

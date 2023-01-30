@@ -17,7 +17,7 @@ export class AuthResolver {
     })
     userInput: UserCreateInput,
   ): Promise<boolean> {
-    const data: User | null = await prismaClient.user.findFirst({
+    const existingUser: User | null = await prismaClient.user.findFirst({
       where: {
         OR: [
           {
@@ -32,10 +32,11 @@ export class AuthResolver {
         ],
       },
     });
-    if (data != null) throw 'User already exsist';
-    console.log(data);
-
-    return true;
+    if (existingUser) throw 'User already exsist';
+    const _user = await prismaClient.user.create({
+      data: { ...userInput },
+    });
+    return _user;
   }
 
   @Mutation(() => User)

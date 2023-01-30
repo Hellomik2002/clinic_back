@@ -1,0 +1,248 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Appointment {
+  author: User!
+  authorId: String!
+  content: String
+  createdAt: DateTime!
+  date: DateTime!
+  id: ID!
+  patient: User!
+  patientId: String!
+  title: String!
+  updatedAt: DateTime!
+}
+
+input AppointmentCreateInput {
+  author: UserCreateNestedOneWithoutAppointmentsAsAuthorInput!
+  content: String
+  createdAt: DateTime
+  date: DateTime!
+  id: String
+  patient: UserCreateNestedOneWithoutAppointmentsAsPatientInput!
+  title: String!
+  updatedAt: DateTime
+}
+
+input AppointmentCreateManyAuthorInput {
+  content: String
+  createdAt: DateTime
+  date: DateTime!
+  id: String
+  patientId: String!
+  title: String!
+  updatedAt: DateTime
+}
+
+input AppointmentCreateManyAuthorInputEnvelope {
+  data: [AppointmentCreateManyAuthorInput!]!
+  skipDuplicates: Boolean
+}
+
+input AppointmentCreateManyPatientInput {
+  authorId: String!
+  content: String
+  createdAt: DateTime
+  date: DateTime!
+  id: String
+  title: String!
+  updatedAt: DateTime
+}
+
+input AppointmentCreateManyPatientInputEnvelope {
+  data: [AppointmentCreateManyPatientInput!]!
+  skipDuplicates: Boolean
+}
+
+input AppointmentCreateNestedManyWithoutAuthorInput {
+  connect: [AppointmentWhereUniqueInput!]
+  connectOrCreate: [AppointmentCreateOrConnectWithoutAuthorInput!]
+  create: [AppointmentCreateWithoutAuthorInput!]
+  createMany: AppointmentCreateManyAuthorInputEnvelope
+}
+
+input AppointmentCreateNestedManyWithoutPatientInput {
+  connect: [AppointmentWhereUniqueInput!]
+  connectOrCreate: [AppointmentCreateOrConnectWithoutPatientInput!]
+  create: [AppointmentCreateWithoutPatientInput!]
+  createMany: AppointmentCreateManyPatientInputEnvelope
+}
+
+input AppointmentCreateOrConnectWithoutAuthorInput {
+  create: AppointmentCreateWithoutAuthorInput!
+  where: AppointmentWhereUniqueInput!
+}
+
+input AppointmentCreateOrConnectWithoutPatientInput {
+  create: AppointmentCreateWithoutPatientInput!
+  where: AppointmentWhereUniqueInput!
+}
+
+input AppointmentCreateWithoutAuthorInput {
+  content: String
+  createdAt: DateTime
+  date: DateTime!
+  id: String
+  patient: UserCreateNestedOneWithoutAppointmentsAsPatientInput!
+  title: String!
+  updatedAt: DateTime
+}
+
+input AppointmentCreateWithoutPatientInput {
+  author: UserCreateNestedOneWithoutAppointmentsAsAuthorInput!
+  content: String
+  createdAt: DateTime
+  date: DateTime!
+  id: String
+  title: String!
+  updatedAt: DateTime
+}
+
+input AppointmentWhereUniqueInput {
+  id: String
+}
+
+type Auth {
+  """JWT access token"""
+  accessToken: JWT!
+
+  """JWT refresh token"""
+  refreshToken: JWT!
+  user: User!
+}
+
+input ChangePasswordInput {
+  newPassword: String!
+  oldPassword: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+"""
+A field whose value is a JSON Web Token (JWT): https://jwt.io/introduction.
+"""
+scalar JWT
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+type Mutation {
+  changePassword(data: ChangePasswordInput!): User!
+  createAppointment(create: AppointmentCreateInput!): Appointment!
+  login(data: LoginInput!): Auth!
+  refreshToken(token: JWT!): Token!
+  signup(data: SignupInput!): Auth!
+  updateUser(data: UpdateUserInput!): User!
+}
+
+type Query {
+  appointments: [Appointment!]!
+  hello(name: String!): String!
+  helloWorld: String!
+  me: User!
+}
+
+enum Role {
+  ADMIN
+  DOCTOR
+  LABORATORY
+  PATIENT
+  USER
+}
+
+input SignupInput {
+  email: String!
+  firstname: String
+  lastname: String
+  password: String!
+}
+
+type Token {
+  """JWT access token"""
+  accessToken: JWT!
+
+  """JWT refresh token"""
+  refreshToken: JWT!
+}
+
+input UpdateUserInput {
+  firstname: String
+  lastname: String
+}
+
+type User {
+  _count: UserCount!
+  appointmentsAsAuthor: [Appointment!]
+  appointmentsAsPatient: [Appointment!]
+  createdAt: DateTime!
+  email: String!
+  firstname: String
+  id: ID!
+  lastname: String
+  password: String!
+  role: Role!
+  updatedAt: DateTime!
+}
+
+type UserCount {
+  appointmentsAsAuthor: Int!
+  appointmentsAsPatient: Int!
+}
+
+input UserCreateNestedOneWithoutAppointmentsAsAuthorInput {
+  connect: UserWhereUniqueInput
+  connectOrCreate: UserCreateOrConnectWithoutAppointmentsAsAuthorInput
+  create: UserCreateWithoutAppointmentsAsAuthorInput
+}
+
+input UserCreateNestedOneWithoutAppointmentsAsPatientInput {
+  connect: UserWhereUniqueInput
+  connectOrCreate: UserCreateOrConnectWithoutAppointmentsAsPatientInput
+  create: UserCreateWithoutAppointmentsAsPatientInput
+}
+
+input UserCreateOrConnectWithoutAppointmentsAsAuthorInput {
+  create: UserCreateWithoutAppointmentsAsAuthorInput!
+  where: UserWhereUniqueInput!
+}
+
+input UserCreateOrConnectWithoutAppointmentsAsPatientInput {
+  create: UserCreateWithoutAppointmentsAsPatientInput!
+  where: UserWhereUniqueInput!
+}
+
+input UserCreateWithoutAppointmentsAsAuthorInput {
+  appointmentsAsPatient: AppointmentCreateNestedManyWithoutPatientInput
+  createdAt: DateTime
+  email: String!
+  firstname: String
+  id: String
+  lastname: String
+  password: String!
+  role: Role
+  updatedAt: DateTime
+}
+
+input UserCreateWithoutAppointmentsAsPatientInput {
+  appointmentsAsAuthor: AppointmentCreateNestedManyWithoutAuthorInput
+  createdAt: DateTime
+  email: String!
+  firstname: String
+  id: String
+  lastname: String
+  password: String!
+  role: Role
+  updatedAt: DateTime
+}
+
+input UserWhereUniqueInput {
+  email: String
+  id: String
+}

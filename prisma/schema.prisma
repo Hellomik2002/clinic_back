@@ -1,20 +1,11 @@
-// MONGO
-// datasource db {
-//   provider = "mongodb"
-//   url      = "mongodb+srv://admin:gpPHn4BEjdHyG91w@cluster0.bo29m4x.mongodb.net/pulse_dev"
-// }
-
-// POSTGRE
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://postgres:rPRO4MoO4iYOwDqwBQC2@containers-us-west-143.railway.app:5505/railway"
+  url      = env("DATABASE_URL")
 }
-
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
+  // previewFeatures = []
 }
 
 generator dbml {
@@ -22,21 +13,45 @@ generator dbml {
 }
 
 model User {
-  id          String   @id @default(cuid()) //@id @default(auto()) @map("_id") @db.ObjectId
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  fullName    String
-  uniqueName  String   @unique
-  // borthDate   DateTime @db.Date
-  email       String
-  phoneNumber String   @unique
-  address     String
+  id          String        @id @default(cuid())
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  email       String        @unique
   password    String
+  firstname   String?
+  lastname    String?
+  role        Role @default(USER)
+  appointmentsAsAuthor Appointment[] @relation("Author")
+  appointmentsAsPatient Appointment[] @relation("Patient")
 }
 
+
+
+model Appointment {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  date      DateTime
+  title     String
+  content   String?
+  author    User    @relation("Author",fields: [authorId], references: [id])
+  authorId  String
+  patient   User    @relation("Patient",fields: [patientId], references: [id])
+  patientId String
+}
+
+enum Role {
+  ADMIN
+  USER
+  PATIENT
+  DOCTOR
+  LABORATORY
+}
+
+
 generator nestgraphql {
-  provider = "node node_modules/prisma-nestjs-graphql"
-  // for yarn monorepos
-  // provider = "prisma-nestjs-graphql"
-  output   = "../src/@generated"
+    provider = "node node_modules/prisma-nestjs-graphql"
+    // for yarn monorepos
+    // provider = "prisma-nestjs-graphql"
+    output = "../src/@generated"
 }
