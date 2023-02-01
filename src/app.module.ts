@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { CacheModule, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GraphQLModule } from '@nestjs/graphql';
@@ -10,12 +10,16 @@ import { PrismaModule } from 'nestjs-prisma';
 import { UserModule } from './users/users.module';
 import { HttpModule } from '@nestjs/axios';
 import { AppointmentsModule } from './appointments/appointments.module';
+import { AuthModule } from './auth/auth.module';
+import config from './common/configs/config';
 
 @Module({
   imports: [
-    HttpModule,
+    { ...HttpModule.register({}), global: true },
+    { ...CacheModule.register(), global: true },
     ConfigModule.forRoot({
       isGlobal: true,
+      load: [config],
     }),
     PrismaModule.forRoot({
       isGlobal: true,
@@ -31,6 +35,7 @@ import { AppointmentsModule } from './appointments/appointments.module';
       sortSchema: true,
       plugins: [ApolloServerPluginLandingPageLocalDefault()],
     }),
+    AuthModule,
     UserModule,
     AppointmentsModule,
   ],
