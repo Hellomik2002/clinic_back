@@ -4,15 +4,16 @@ import { AppService } from './app.service';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
-import { CheckModule } from './check/check.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
-import { BookingModel } from './booking/booking.model';
 import { PrismaModule } from 'nestjs-prisma';
-import { UserModule } from './user/user.module';
+import { UserModule } from './users/users.module';
+import { HttpModule } from '@nestjs/axios';
+import { AppointmentsModule } from './appointments/appointments.module';
 
 @Module({
   imports: [
+    HttpModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -30,8 +31,8 @@ import { UserModule } from './user/user.module';
       sortSchema: true,
       plugins: [ApolloServerPluginLandingPageLocalDefault()],
     }),
-    BookingModel,
     UserModule,
+    AppointmentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

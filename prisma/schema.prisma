@@ -21,22 +21,45 @@ generator dbml {
   provider = "prisma-dbml-generator"
 }
 
-model User {
-  id          String   @id @default(cuid()) //@id @default(auto()) @map("_id") @db.ObjectId
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  fullName    String
-  uniqueName  String   @unique
-  // borthDate   DateTime @db.Date
-  email       String
-  phoneNumber String   @unique
-  address     String
-  password    String
-}
-
 generator nestgraphql {
   provider = "node node_modules/prisma-nestjs-graphql"
   // for yarn monorepos
   // provider = "prisma-nestjs-graphql"
   output   = "../src/@generated"
+}
+
+model User {
+  id                    String        @id @default(cuid())
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  email                 String        @unique
+  password              String
+  fullName              String
+  uniqueName            String        @unique
+  phoneNumber           String        @unique
+  address               String
+  role                  Role          @default(USER)
+  appointmentsAsAuthor  Appointment[] @relation("Author")
+  appointmentsAsPatient Appointment[] @relation("Patient")
+}
+
+model Appointment {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  date      DateTime
+  title     String
+  content   String?
+  author    User     @relation("Author", fields: [authorId], references: [id])
+  authorId  String
+  patient   User     @relation("Patient", fields: [patientId], references: [id])
+  patientId String
+}
+
+enum Role {
+  ADMIN
+  USER
+  PATIENT
+  DOCTOR
+  LABORATORY
 }
