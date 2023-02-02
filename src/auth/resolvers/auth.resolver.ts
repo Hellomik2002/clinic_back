@@ -10,6 +10,7 @@ import { ApolloError } from 'apollo-server-core';
 import { Cache } from 'cache-manager';
 
 import { User } from 'src/@generated/user/user.model';
+import { prismaClient } from 'src/main';
 import { LoginInput } from '../dto/login.input';
 import { RefreshTokenInput } from '../dto/refresh-token.input';
 import { SignupInput } from '../dto/signup.input';
@@ -30,6 +31,14 @@ export class AuthResolver {
   @Mutation(() => Boolean)
   async signup(@Args('data') data: SignupInput): Promise<boolean> {
     data.email = data.email.toLowerCase();
+    const user = await prismaClient.user.findFirst({
+      where: {
+        email: data.email,
+        phoneNumber: data.phoneNumber,
+        uniqueName: data.uniqueName,
+      },
+    });
+    if (user != null) throw new ApolloError("User exist");
     const val = `${makeNumber(4)}`;
     await this.cacheManager.set(
       data.email + data.fullName + data.uniqueName + data.phoneNumber,
