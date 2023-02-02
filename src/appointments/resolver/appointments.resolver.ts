@@ -5,23 +5,25 @@ import { Appointment } from 'src/@generated/appointment/appointment.model';
 
 @Resolver()
 export class AppointmentsResolver {
-  // inject prisma service here
-  private readonly prisma: PrismaService;
+	// inject prisma service here
+	private readonly prisma: PrismaService;
 
-  constructor(prisma: PrismaService) {
-    this.prisma = prisma;
-  }
+	constructor(prisma: PrismaService) {
+		this.prisma = prisma;
+	}
 
-  @Query(() => [Appointment])
-  async appointments(): Promise<Appointment[]> {
-    return await this.prisma.appointment.findMany({ where: { authorId: '1' } });
-  }
+	@Query(() => [Appointment])
+	async appointments(): Promise<Appointment[]> {
+		return await this.prisma.appointment.findMany({
+			where: { authorId: '1' },
+		});
+	}
 
-  @Mutation(() => Appointment)
-  async createAppointment(
-    @Args('create', { type: () => AppointmentCreateInput })
-    args: AppointmentCreateInput
-  ): Promise<Appointment> {
-    return this.prisma.appointment.create({ data: { ...args } });
-  }
+	@Mutation(() => Appointment)
+	async createAppointment(
+		@Args('create', { type: () => AppointmentCreateInput })
+		args: AppointmentCreateInput,
+	): Promise<Appointment> {
+		return this.prisma.appointment.create({ data: { ...args } });
+	}
 }

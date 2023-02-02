@@ -15,19 +15,19 @@ import { PrismaClient } from '@prisma/client';
 export const prismaClient = new PrismaClient();
 
 async function bootstrap() {
-  dayjs.extend(UTCPlugin);
-  dayjs.extend(ISOPlugin);
-  dayjs.extend(IsBetweenPlugin);
-  dayjs.extend(IsSameOrAfterPlugin);
-  dayjs.extend(isSameOrBeforePlugin);
-  dayjs.extend(DurationPlugin);
+	dayjs.extend(UTCPlugin);
+	dayjs.extend(ISOPlugin);
+	dayjs.extend(IsBetweenPlugin);
+	dayjs.extend(IsSameOrAfterPlugin);
+	dayjs.extend(isSameOrBeforePlugin);
+	dayjs.extend(DurationPlugin);
 
-  const app = await NestFactory.create(AppModule, {
-    cors: true,
-  });
+	const app = await NestFactory.create(AppModule, {
+		cors: true,
+	});
 
-  app.use('/graphql', graphqlUploadExpress({}));
+	app.use('/graphql', graphqlUploadExpress({}));
 
-  await app.listen(3000);
+	await app.listen(3000);
 }
 bootstrap();

@@ -14,32 +14,32 @@ import { AuthModule } from './auth/auth.module';
 import config from './common/configs/config';
 
 @Module({
-  imports: [
-    { ...HttpModule.register({}), global: true },
-    { ...CacheModule.register(), global: true },
-    ConfigModule.forRoot({
-      isGlobal: true,
-      load: [config],
-    }),
-    PrismaModule.forRoot({
-      isGlobal: true,
-    }),
-    MongooseModule.forRoot(process.env.DATABASE_URL, {
-      dbName: process.env.DATABASE_NAME,
-    }),
-    GraphQLModule.forRoot<ApolloDriverConfig>({
-      driver: ApolloDriver,
-      debug: true,
-      playground: false,
-      autoSchemaFile: true,
-      sortSchema: true,
-      plugins: [ApolloServerPluginLandingPageLocalDefault()],
-    }),
-    AuthModule,
-    UserModule,
-    AppointmentsModule,
-  ],
-  controllers: [AppController],
-  providers: [AppService],
+	imports: [
+		{ ...HttpModule.register({}), global: true },
+		{ ...CacheModule.register(), global: true },
+		ConfigModule.forRoot({
+			isGlobal: true,
+			load: [config],
+		}),
+		PrismaModule.forRoot({
+			isGlobal: true,
+		}),
+		MongooseModule.forRoot(process.env.DATABASE_URL, {
+			dbName: process.env.DATABASE_NAME,
+		}),
+		GraphQLModule.forRoot<ApolloDriverConfig>({
+			driver: ApolloDriver,
+			debug: true,
+			playground: false,
+			autoSchemaFile: true,
+			sortSchema: true,
+			plugins: [ApolloServerPluginLandingPageLocalDefault()],
+		}),
+		AuthModule,
+		UserModule,
+		AppointmentsModule,
+	],
+	controllers: [AppController],
+	providers: [AppService],
 })
 export class AppModule {}
