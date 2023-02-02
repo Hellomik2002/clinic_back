@@ -45,7 +45,9 @@ export class AuthService {
         e instanceof Prisma.PrismaClientKnownRequestError &&
         e.code === 'P2002'
       ) {
-        throw new ConflictException(`UniqueName ${payload.uniqueName} already used.`);
+        throw new ConflictException(
+          `UniqueName ${payload.uniqueName} already used.`,
+        );
       }
       throw new Error(e);
     }
@@ -55,7 +57,9 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({ where: { uniqueName } });
 
     if (!user) {
-      throw new NotFoundException(`No user found for uniqueName: ${uniqueName}`);
+      throw new NotFoundException(
+        `No user found for uniqueName: ${uniqueName}`,
+      );
     }
 
     const passwordValid = await this.passwordService.validatePassword(

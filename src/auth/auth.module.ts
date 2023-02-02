@@ -12,28 +12,29 @@ import { AuthResolver } from './resolvers/auth.resolver';
 import { SMSService } from './services/sms.service';
 
 @Module({
-  imports: [
-    PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.registerAsync({
-      useFactory: async (configService: ConfigService) => {
-        const securityConfig = configService.get<SecurityConfig>('security');
-        return {
-          secret: configService.get<string>('JWT_ACCESS_SECRET'),
-          signOptions: {
-            expiresIn: securityConfig.expiresIn,
-          },
-        };
-      },
-      inject: [ConfigService],
-    }),
-  ],
-  providers: [
-    AuthService,
-    AuthResolver,
-    JwtStrategy,
-    GqlAuthGuard,
-    PasswordService,
-    SMSService,
-  ],
+	imports: [
+		PassportModule.register({ defaultStrategy: 'jwt' }),
+		JwtModule.registerAsync({
+			useFactory: async (configService: ConfigService) => {
+				const securityConfig =
+					configService.get<SecurityConfig>('security');
+				return {
+					secret: configService.get<string>('JWT_ACCESS_SECRET'),
+					signOptions: {
+						expiresIn: securityConfig.expiresIn,
+					},
+				};
+			},
+			inject: [ConfigService],
+		}),
+	],
+	providers: [
+		AuthService,
+		AuthResolver,
+		JwtStrategy,
+		GqlAuthGuard,
+		PasswordService,
+		SMSService,
+	],
 })
 export class AuthModule {}

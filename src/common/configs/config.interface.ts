@@ -1,17 +1,17 @@
 export interface Config {
-  nest: NestConfig;
-  cors: CorsConfig;
-  security: SecurityConfig;
+	nest: NestConfig;
+	cors: CorsConfig;
+	security: SecurityConfig;
 }
 export interface NestConfig {
-  port: number;
+	port: number;
 }
 export interface CorsConfig {
-  enabled: boolean;
+	enabled: boolean;
 }
 
 export interface SecurityConfig {
-  expiresIn: string;
-  refreshIn: string;
-  bcryptSaltOrRound: string | number;
+	expiresIn: string;
+	refreshIn: string;
+	bcryptSaltOrRound: string | number;
 }
