@@ -37,7 +37,7 @@ model User {
   fullName              String
   uniqueName            String        @unique
   phoneNumber           String        @unique
-  address               String
+  address               String?
   role                  Role          @default(USER)
   appointmentsAsAuthor  Appointment[] @relation("Author")
   appointmentsAsPatient Appointment[] @relation("Patient")

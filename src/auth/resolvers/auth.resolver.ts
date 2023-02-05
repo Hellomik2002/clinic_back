@@ -8,6 +8,7 @@ import {
 } from '@nestjs/graphql';
 import { ApolloError } from 'apollo-server-core';
 import { Cache } from 'cache-manager';
+import { UserCreateInput } from 'src/@generated/user/user-create.input';
 
 import { User } from 'src/@generated/user/user.model';
 import { prismaClient } from 'src/main';
@@ -29,8 +30,10 @@ export class AuthResolver {
 	) {}
 
 	@Mutation(() => Boolean)
-	async signup(@Args('data') data: SignupInput): Promise<boolean> {
+	async signup(@Args('data') data: UserCreateInput): Promise<boolean> {
 		data.email = data.email.toLowerCase();
+		// 300 * 1000 = 5 min
+		const CACHE_TTL = 300 * 1000;
 		const user = await prismaClient.user.findFirst({
 			where: {
 				email: data.email,
@@ -40,11 +43,13 @@ export class AuthResolver {
 		});
 		if (user != null) throw new ApolloError('User exist');
 		const val = `${makeNumber(4)}`;
+		console.log('DEBUG | SMS_CODE: ', val);
 		await this.cacheManager.set(
 			data.email + data.fullName + data.uniqueName + data.phoneNumber,
 			val,
-			1000,
+			CACHE_TTL,
 		);
+
 		await this.smsService.sendCode(val, data.phoneNumber);
 
 		return true;
@@ -52,7 +57,7 @@ export class AuthResolver {
 
 	@Mutation(() => Auth)
 	async verifyCode(
-		@Args('data') data: SignupInput,
+		@Args('data') data: UserCreateInput,
 		@Args('code') code: string,
 	): Promise<Token> {
 		data.email = data.email.toLowerCase();

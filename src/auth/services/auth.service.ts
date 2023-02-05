@@ -13,6 +13,7 @@ import { PasswordService } from './password.service';
 import { SignupInput } from '../dto/signup.input';
 import { SecurityConfig } from 'src/common/configs/config.interface';
 import { Token } from '../models/token.model';
+import { UserCreateInput } from 'src/@generated/user/user-create.input';
 
 @Injectable()
 export class AuthService {
@@ -23,7 +24,7 @@ export class AuthService {
 		private readonly configService: ConfigService,
 	) {}
 
-	async createUser(payload: SignupInput): Promise<Token> {
+	async createUser(payload: UserCreateInput): Promise<Token> {
 		const hashedPassword = await this.passwordService.hashPassword(
 			payload.password,
 		);
