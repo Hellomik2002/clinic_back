@@ -8,9 +8,11 @@ import {
 } from '@nestjs/graphql';
 import { ApolloError } from 'apollo-server-core';
 import { Cache } from 'cache-manager';
+import { randomUUID } from 'crypto';
 
 import { User } from 'src/@generated/user/user.model';
 import { prismaClient } from 'src/main';
+import { calPrismaClient } from 'src/prisma/client_cal';
 import { LoginInput } from '../dto/login.input';
 import { RefreshTokenInput } from '../dto/refresh-token.input';
 import { SignupInput } from '../dto/signup.input';
@@ -27,6 +29,22 @@ export class AuthResolver {
 		private readonly auth: AuthService,
 		private readonly smsService: SMSService,
 	) {}
+
+	@Mutation(() => Boolean)
+	async createFstBooking() {
+		const check = await calPrismaClient.booking.create({
+			// data: new Date(),
+			data: {
+				startTime: new Date('2023-02-15T05:30:00.000Z'),
+				endTime: new Date('2023-02-15T04:00:00.000Z'),
+				title: 'THE WORLD',
+				uid: randomUUID(),
+				eventTypeId: 20,
+				userId: 14,
+			},
+		});
+		console.log(check);
+	}
 
 	@Mutation(() => Boolean)
 	async signup(@Args('data') data: SignupInput): Promise<boolean> {
