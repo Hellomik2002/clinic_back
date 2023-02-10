@@ -24,9 +24,9 @@ import config from './common/configs/config';
 		PrismaModule.forRoot({
 			isGlobal: true,
 		}),
-		// MongooseModule.forRoot(process.env.DATABASE_URL, {
-		// 	dbName: process.env.DATABASE_NAME,
-		// }),
+		MongooseModule.forRoot(process.env.DATABASE_URL, {
+			dbName: process.env.DATABASE_NAME,
+		}),
 		GraphQLModule.forRoot<ApolloDriverConfig>({
 			driver: ApolloDriver,
 			debug: true,

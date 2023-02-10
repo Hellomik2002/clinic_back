@@ -1,7 +1,0 @@
-{
-  "name": "client_car",
-  "main": "index.js",
-  "types": "index.d.ts",
-  "browser": "index-browser.js",
-  "version": "0.0.1"
-}
