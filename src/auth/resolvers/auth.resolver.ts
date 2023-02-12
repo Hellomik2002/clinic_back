@@ -56,25 +56,51 @@ export class AuthResolver {
 	}
 
 	@Mutation(() => Auth)
+	async signUpDoctor(
+		@Args('data') data: UserCreateInput,
+	): Promise<Token & { user: User }> {
+		const existingUser = await prismaClient.user.findFirst({
+			where: {
+				email: data.email,
+				phoneNumber: data.phoneNumber,
+				uniqueName: data.uniqueName,
+			},
+		});
+		if (existingUser != null) throw new ApolloError('User exist');
+		const { accessToken, refreshToken, user } =
+			await this.auth.createDoctor(data);
+
+		return {
+			accessToken,
+			refreshToken,
+			user,
+		};
+	}
+
+	@Mutation(() => Auth)
 	async verifyCode(
 		@Args('data') data: UserCreateInput,
 		@Args('code') code: string,
-	): Promise<Token> {
+	): Promise<Token & { user: User }> {
 		data.email = data.email.toLowerCase();
 		const val = await this.cacheManager.get(
 			data.email + data.fullName + data.uniqueName + data.phoneNumber,
 		);
 		if (val != code) throw new ApolloError('Code is wrong');
-		const { accessToken, refreshToken } = await this.auth.createUser(data);
+		const { accessToken, refreshToken, user } = await this.auth.createUser(
+			data,
+		);
+
 		return {
 			accessToken,
 			refreshToken,
+			user,
 		};
 	}
 
-	@Mutation(() => Token)
+	@Mutation(() => Auth)
 	async login(@Args('data') { uniqueName, password }: LoginInput) {
-		const { accessToken, refreshToken } = await this.auth.login(
+		const { accessToken, refreshToken, user } = await this.auth.login(
 			uniqueName.toLowerCase(),
 			password,
 		);
@@ -82,6 +108,7 @@ export class AuthResolver {
 		return {
 			accessToken,
 			refreshToken,
+			user,
 		};
 	}
 

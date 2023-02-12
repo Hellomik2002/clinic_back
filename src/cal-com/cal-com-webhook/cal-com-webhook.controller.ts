@@ -7,6 +7,9 @@ export class CalComWebhookController {
 	@Post()
 	async postCalComWebhook(@Body() payload: any) {
 		console.log(payload);
+
+		// is unique email
+		// if unique create new account with medcart
 		return 'ok';
 	}
 }

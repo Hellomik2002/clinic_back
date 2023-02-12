@@ -14,6 +14,10 @@ import { SignupInput } from '../dto/signup.input';
 import { SecurityConfig } from 'src/common/configs/config.interface';
 import { Token } from '../models/token.model';
 import { UserCreateInput } from 'src/@generated/user/user-create.input';
+import { CalComAccountManagerService } from 'src/cal-com/cal-com-account-manager/cal-com-account-manager.service';
+import { CalComAccountSignUpDto } from 'src/cal-com/cal-com-account-manager/dto/createCalAccountDto';
+
+type AuthResponse = Token & { user: User };
 
 @Injectable()
 export class AuthService {
@@ -22,9 +26,10 @@ export class AuthService {
 		private readonly prisma: PrismaService,
 		private readonly passwordService: PasswordService,
 		private readonly configService: ConfigService,
+		private readonly calcomAccountManagerService: CalComAccountManagerService,
 	) {}
 
-	async createUser(payload: UserCreateInput): Promise<Token> {
+	async createUser(payload: UserCreateInput): Promise<AuthResponse> {
 		const hashedPassword = await this.passwordService.hashPassword(
 			payload.password,
 		);
@@ -38,9 +43,12 @@ export class AuthService {
 				},
 			});
 
-			return this.generateTokens({
-				userId: user.id,
-			});
+			return {
+				...this.generateTokens({
+					userId: user.id,
+				}),
+				user,
+			};
 		} catch (e) {
 			if (
 				e instanceof Prisma.PrismaClientKnownRequestError &&
@@ -54,7 +62,55 @@ export class AuthService {
 		}
 	}
 
-	async login(uniqueName: string, password: string): Promise<Token> {
+	async createDoctor(payload: UserCreateInput): Promise<AuthResponse> {
+		const hashedPassword = await this.passwordService.hashPassword(
+			payload.password,
+		);
+
+		try {
+			const user = await this.prisma.user.create({
+				data: {
+					...payload,
+					password: hashedPassword,
+					role: 'DOCTOR',
+				},
+			});
+
+			const calcomAccountCreationDto: CalComAccountSignUpDto = {
+				email: user.email,
+				username: user.uniqueName,
+				password: payload.password,
+			};
+			try {
+				const res =
+					await this.calcomAccountManagerService.createCalAccount(
+						calcomAccountCreationDto,
+					);
+				console.log(res);
+			} catch (e) {
+				console.log(e);
+			}
+
+			return {
+				...this.generateTokens({
+					userId: user.id,
+				}),
+				user,
+			};
+		} catch (e) {
+			if (
+				e instanceof Prisma.PrismaClientKnownRequestError &&
+				e.code === 'P2002'
+			) {
+				throw new ConflictException(
+					`UniqueName ${payload.uniqueName} already used.`,
+				);
+			}
+			throw new Error(e);
+		}
+	}
+
+	async login(uniqueName: string, password: string): Promise<AuthResponse> {
 		const user = await this.prisma.user.findUnique({
 			where: { uniqueName },
 		});
@@ -74,9 +130,12 @@ export class AuthService {
 			throw new BadRequestException('Invalid password');
 		}
 
-		return this.generateTokens({
-			userId: user.id,
-		});
+		return {
+			...this.generateTokens({
+				userId: user.id,
+			}),
+			user,
+		};
 	}
 
 	validateUser(userId: string): Promise<User> {

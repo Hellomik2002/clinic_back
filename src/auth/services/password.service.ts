@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Global, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { hash, compare } from 'bcrypt';
 import { SecurityConfig } from 'src/common/configs/config.interface';
 
+@Global()
 @Injectable()
 export class PasswordService {
 	get bcryptSaltRounds(): string | number {

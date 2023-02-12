@@ -31,9 +31,7 @@ import * as redisStore from 'cache-manager-redis-store';
 		PrismaModule.forRoot({
 			isGlobal: true,
 		}),
-		MongooseModule.forRoot(process.env.DATABASE_URL, {
-			dbName: process.env.DATABASE_NAME,
-		}),
+
 		GraphQLModule.forRoot<ApolloDriverConfig>({
 			driver: ApolloDriver,
 			debug: true,

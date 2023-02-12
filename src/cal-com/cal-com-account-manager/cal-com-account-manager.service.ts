@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { PasswordService } from 'src/auth/services/password.service';
 import { CalComAccountSignUpDto } from './dto/createCalAccountDto';
 
 @Injectable()
 export class CalComAccountManagerService {
 	// inject the config service here
-	constructor(private readonly configService: ConfigService) {}
+	constructor(
+		private readonly configService: ConfigService,
+		private readonly passwordService: PasswordService,
+	) {}
 
 	// create a function to get the API key
 	createCalAccount(dto: CalComAccountSignUpDto) {
@@ -15,7 +19,6 @@ export class CalComAccountManagerService {
 		return fetch(calComApi, {
 			body: JSON.stringify({
 				...dto,
-				username: dto.firstName + dto.lastName,
 			}),
 			headers: {
 				'Content-Type': 'application/json',
@@ -23,4 +26,6 @@ export class CalComAccountManagerService {
 			method: 'POST',
 		});
 	}
+
+	private;
 }
