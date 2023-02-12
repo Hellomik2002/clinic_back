@@ -7,7 +7,7 @@
 // POSTGRE
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://postgres:rPRO4MoO4iYOwDqwBQC2@containers-us-west-143.railway.app:5505/railway"
+  url      = "postgresql://postgres:z8zb8jKadEACdzARhmsP@containers-us-west-165.railway.app:6983/railway"
 }
 
 // This is your Prisma schema file,
@@ -63,3 +63,37 @@ enum Role {
   DOCTOR
   LABORATORY
 }
+
+model Doctor {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  email       String   @unique
+  password    String
+  fullName    String
+  uniqueName  String   @unique
+  bookingLink String
+  bookingId   String
+  phoneNumber String
+  // specializations
+}
+
+  // _id: string;
+
+// @Field()
+// name: string;
+
+// @Field()
+// description: string;
+
+// @Field(() => PhotoURLGraph, { nullable: true })
+// photoURL: PhotoURLGraph;
+
+// @Field(() => ColorCodeGradientGraph, { nullable: true })
+// colorCodeGradient: ColorCodeGradientGraph;
+
+// @Field(() => [DoctorGraph])
+// doctors: DoctorGraph[];
+
+// @Field(() => [ServiceGraph])
+// services: ServiceGraph[];

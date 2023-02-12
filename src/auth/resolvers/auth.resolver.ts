@@ -13,7 +13,11 @@ import { randomUUID } from 'crypto';
 import { User } from 'src/@generated/user/user.model';
 import { prismaClient } from 'src/main';
 import { calPrismaClient } from 'src/prisma/client_cal';
-import { LoginInput } from '../dto/login.input';
+import {
+	LoginInput,
+	PhoneCodeInput,
+	PhoneLoginInput,
+} from '../dto/login.input';
 import { RefreshTokenInput } from '../dto/refresh-token.input';
 import { SignupInput } from '../dto/signup.input';
 import { Auth } from '../models/auth.model';
@@ -48,22 +52,33 @@ export class AuthResolver {
 
 	@Mutation(() => Boolean)
 	async signup(@Args('data') data: SignupInput): Promise<boolean> {
-		data.email = data.email.toLowerCase();
-		const user = await prismaClient.user.findFirst({
-			where: {
-				email: data.email,
-				phoneNumber: data.phoneNumber,
-				uniqueName: data.uniqueName,
-			},
-		});
+		data.address = data.address.trim();
+		data.email = data.email.toLowerCase().trim();
+		data.fullName = data.fullName.trim();
+		data.phoneNumber = data.phoneNumber.trim();
+		data.uniqueName = data.uniqueName.trim();
+
+		let user: User | null = null;
+		try {
+			user = await prismaClient.user.findFirstOrThrow({
+				where: {
+					OR: [
+						{ email: data.email },
+						{ phoneNumber: data.phoneNumber },
+						{ uniqueName: data.uniqueName },
+					],
+				},
+			});
+		} catch (e) {}
 		if (user != null) throw new ApolloError('User exist');
+
 		const val = `${makeNumber(4)}`;
-		await this.cacheManager.set(
-			data.email + data.fullName + data.uniqueName + data.phoneNumber,
-			val,
-			1000,
-		);
-		await this.smsService.sendCode(val, data.phoneNumber);
+		console.log(val);
+		const keyCache =
+			data.email + data.fullName + data.uniqueName + data.phoneNumber;
+		this.cacheManager.set(keyCache, val, 1000 * 60 * 2);
+
+		this.smsService.sendCode(val, data.phoneNumber);
 
 		return true;
 	}
@@ -73,10 +88,16 @@ export class AuthResolver {
 		@Args('data') data: SignupInput,
 		@Args('code') code: string,
 	): Promise<Token> {
-		data.email = data.email.toLowerCase();
-		const val = await this.cacheManager.get(
-			data.email + data.fullName + data.uniqueName + data.phoneNumber,
-		);
+		data.address = data.address.trim();
+		data.email = data.email.toLowerCase().trim();
+		data.fullName = data.fullName.trim();
+		data.phoneNumber = data.phoneNumber.trim();
+		data.uniqueName = data.uniqueName.trim();
+
+		const keyCache =
+			data.email + data.fullName + data.uniqueName + data.phoneNumber;
+
+		const val = await this.cacheManager.get(keyCache);
 		if (val != code) throw new ApolloError('Code is wrong');
 		const { accessToken, refreshToken } = await this.auth.createUser(data);
 		return {
@@ -91,7 +112,33 @@ export class AuthResolver {
 			uniqueName.toLowerCase(),
 			password,
 		);
+		return {
+			accessToken,
+			refreshToken,
+		};
+	}
 
+	@Mutation(() => Boolean)
+	async loginBySms(@Args('data') { phoneNumber }: PhoneLoginInput) {
+		const val = `${makeNumber(4)}`;
+		console.log(val);
+		const keyCache = phoneNumber;
+		this.cacheManager.set(keyCache, val, 1000 * 60 * 2);
+
+		this.smsService.sendCode(val, phoneNumber);
+		return true;
+	}
+
+	async loginVerify(@Args('data') { phoneNumber, code }: PhoneCodeInput) {
+		const keyCache = phoneNumber;
+
+		const val = await this.cacheManager.get(keyCache);
+		if (val != code) throw new ApolloError('Code is wrong');
+		const userId = (await this.auth.getUserFromPhoneNumber(phoneNumber)).id;
+
+		const { accessToken, refreshToken } = await this.auth.generateTokens({
+			userId,
+		});
 		return {
 			accessToken,
 			refreshToken,
