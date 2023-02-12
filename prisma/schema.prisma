@@ -1,13 +1,6 @@
-// MONGO
-// datasource db {
-//   provider = "mongodb"
-//   url      = "mongodb+srv://admin:gpPHn4BEjdHyG91w@cluster0.bo29m4x.mongodb.net/pulse_dev"
-// }
-
-// POSTGRE
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://postgres:rPRO4MoO4iYOwDqwBQC2@containers-us-west-143.railway.app:5505/railway"
+  url      = env("DATABASE_URL")
 }
 
 // This is your Prisma schema file,
@@ -37,7 +30,7 @@ model User {
   fullName              String
   uniqueName            String        @unique
   phoneNumber           String        @unique
-  address               String
+  address               String?
   role                  Role          @default(USER)
   appointmentsAsAuthor  Appointment[] @relation("Author")
   appointmentsAsPatient Appointment[] @relation("Patient")
